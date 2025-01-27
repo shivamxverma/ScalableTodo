@@ -4,8 +4,11 @@ const cors = require('cors');
 const {Connect} = require('./utils/db');
 const todoRoute = require('./routes/todo');
 const userRoute = require('./routes/user');
+const RestrictToLoggedinUserOnly = require('./middlewares/auth');
 const port = process.env.PORT | 8000;
 Connect('mongodb+srv://Shivam:Hanumaan@cluster0.leo9l.mongodb.net/mydb');
+
+app.use(RestrictToLoggedinUserOnly)
 
 app.use(express.static('../frontend'));
 app.use(cors());
