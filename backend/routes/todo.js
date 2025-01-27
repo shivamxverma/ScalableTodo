@@ -3,7 +3,9 @@ const router = express.Router();
 const {getTodos , createTodo , updateTodo , deleteTodo} = require('../controllers/todo');
 
 router.get('/', getTodos);
-router.post('/', createTodo);
+router.post('/', (req,res)=>{
+  createTodo(req,res);
+});
 
 router.
   route('/:id').
