@@ -2,54 +2,64 @@ import axios from 'axios';
 import { useState } from 'react';
 
 const Signup = () => {
-  const [name ,setname] = useState("");
-  const [email ,setemail] = useState("");
-  const [password ,setpassword] = useState("");
-  const [success,setSuccess] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [success, setSuccess] = useState(false);
   const backendUrl = 'http://localhost:8000/user';
 
   const SignupSubmitHandler = async () => {
-    if(name==='' || email === '' || password === ''){
+    if (name === '' || email === '' || password === '') {
       setSuccess(false);
-      return ;
+      return;
     }
-    try{
-      await axios.post(backendUrl,{name , email , password})
+    try {
+      await axios.post(backendUrl, { name, email, password });
       setSuccess(true);
-      setname('');
-      setemail('');
-      setpassword('');
+      setName('');
+      setEmail('');
+      setPassword('');
       window.location.href = "http://localhost:5173/signin";
-    }catch(err){
-      alert('error in signup',err);
+    } catch (err) {
+      alert('Error in signup', err);
     }
-  }
-  
+  };
+
   return (
-    <div>
-      {success&&<h1>User is Successfully Signup</h1>}
-      <h1>Sign up Page</h1><br />
-      <input 
-        value={name}
-        onChange={(e)=>setname(e.target.value)}
-        type="text" 
-        placeholder='Enter your name' 
-      /><br />
-      <input 
-        value={email}
-        onChange={(e)=>setemail(e.target.value)}
-        type="email" 
-        placeholder='Enter email' 
-      /><br />
-      <input 
-        value={password}
-        onChange={(e)=>setpassword(e.target.value)}
-        type="password" 
-        placeholder='Enter password' 
-      /><br />
-      <button onClick={SignupSubmitHandler}>Signup</button>
+    <div className="flex justify-center items-center min-h-screen bg-gray-100">
+      <div className="bg-white p-8 rounded-lg shadow-md w-96">
+        {success && <h1 className="text-green-600 text-center mb-4">User is Successfully Signed Up</h1>}
+        <h1 className="text-2xl font-bold text-center mb-6">Sign Up</h1>
+        <input 
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          type="text" 
+          placeholder='Enter your name' 
+          className="w-full p-2 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input 
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          type="email" 
+          placeholder='Enter email' 
+          className="w-full p-2 mb-4 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <input 
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          type="password" 
+          placeholder='Enter password' 
+          className="w-full p-2 mb-6 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+        />
+        <button 
+          onClick={SignupSubmitHandler}
+          className="w-full bg-blue-600 text-white p-2 rounded-lg hover:bg-blue-700 transition"
+        >
+          Signup
+        </button>
+      </div>
     </div>
   );
-}
+};
 
 export default Signup;

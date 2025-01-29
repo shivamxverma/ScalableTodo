@@ -24,12 +24,12 @@ function LandingPage() {
   }, []);
 
   const onsubmit = async () => {
-    if (todo === '' || description === '') {
+    if (todo === '' || description === '' || Difficulty === 0 || date === 0 || time === 0) {
       setsucces(false);
       return;
     }
     try {
-      await axios.post(backendUrl, { todo, description, isDone: false });
+      await axios.post(backendUrl, { todo, description, isDone: false,difficulty:Difficulty,date:date,time:time });
       setsucces(true);
       setTodo('');
       setDescription('');

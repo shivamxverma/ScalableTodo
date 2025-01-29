@@ -1,12 +1,12 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
+const { v4 : uuidv4 } = require('uuid');
 const {setUser,getUser} = require('../services/auth');
 
-
-const getUser = async (req,res) => {
+const getUserforSignin = async (req,res) => {
   const user = req.body;
   const {email , password}  = user;
-  const isSignup = await User.findOne({ email: email });
+  const isSignup = await User.findOne({ email });
   
   if(!isSignup){
     console.log('user does not exist');
@@ -15,21 +15,23 @@ const getUser = async (req,res) => {
 
   const isValid = bcrypt.compareSync(password, isSignup.password);
 
-  if(isValid){
-    return res.status(200).json({msg:"user is logged in"});
-  } else {
-    const token = setUser(user);
-    return res.status(500).json({msg:"server error"});
-  }
+  if(!isValid){
+    // const token = createUserToken(user);
+    return res.status(404).json({msg:"Invalid username and Password"});
+  } 
+  const sessionId = uuidv4();
+  setUser(sessionId,user);
+  res.cookie('uid',sessionId);
+  
+  return res.status(200).json({msg:"Logged in Successfully Broh"});
 };
 
 const createUser = async (req, res) => {
   const { name, email, password } = req.body;
 
-  const isSignup = await User.findOne({ email: email });
+  const isSignup = await User.findOne({ email });
 
   if (isSignup) {
-    console.log('User is already signup');
     return res.json({ msg: "User is already signed up" });
   }
   else {
@@ -39,9 +41,9 @@ const createUser = async (req, res) => {
     await User.create({ name:name, email:email, password:hashedPassword });
     res.status(200).json({msg:"you are signed up"});
   }
-}
+};
 
 module.exports = {
-  getUser,
+  getUserforSignin,
   createUser
 }
