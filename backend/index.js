@@ -7,9 +7,9 @@ const userRoute = require('./routes/user');
 const todoRoute = require('./routes/todo');
 const RestrictToLoggedinUserOnly = require('./middlewares/auth');
 const port = process.env.PORT | 8000;
-Connect('mongodb+srv://Shivam:Hanumaan@cluster0.leo9l.mongodb.net/mydb');
+const uri = process.env.MONGODB_URI;
 
-// app.use(RestrictToLoggedinUserOnly);
+Connect(uri);
 
 app.use(express.static('../frontend'));
 app.use(cors());
