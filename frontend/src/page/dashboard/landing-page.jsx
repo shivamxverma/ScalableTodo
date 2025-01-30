@@ -1,117 +1,146 @@
 import { useState, useEffect } from 'react';
 import axios from 'axios';
-// import Header from './components/Header';
+import { useNavigate } from 'react-router-dom';
 
 function LandingPage() {
+  // const [token, setToken] = useState(localStorage.getItem("token"));
   const [todo, setTodo] = useState('');
   const [description, setDescription] = useState('');
   const [todos, setTodos] = useState([]);
-  const [Difficulty,setDifficulty] = useState(0);
-  const [date,setdate] = useState(Date.now());
-  const [success, setsucces] = useState(null);
-  const [time,settime] = useState(0);
+  const [difficulty, setDifficulty] = useState(50); 
+  const [date, setDate] = useState(new Date().toISOString().split('T')[0]); 
+  const [time, setTime] = useState('12:00');
+  const [success, setSuccess] = useState(null);
   const backendUrl = 'http://localhost:8000/todo';
-  const fetchTodos = () => {
-    fetch(backendUrl)
-      .then(async (res) => {
-        const data = await res.json();
-        setTodos(data);
-      });
+  const navigate = useNavigate();
+
+
+  const fetchTodos = async () => {
+    try {
+      const res = await axios.get(backendUrl);
+      setTodos(res.data);
+    } catch (err) {
+      console.error('Error fetching todos', err);
+    }
   };
 
   useEffect(() => {
+    // console.log(localStorage.getItem("token"));
     fetchTodos();
-  }, []);
+  }, [todos]);
 
-  const onsubmit = async () => {
-    if (todo === '' || description === '' || Difficulty === 0 || date === 0 || time === 0) {
-      setsucces(false);
+  const onSubmit = async () => {
+    if (todo.trim() === '' || description.trim() === '') {
+      setSuccess(false);
       return;
     }
+
     try {
-      await axios.post(backendUrl, { todo, description, isDone: false,difficulty:Difficulty,date:date,time:time });
-      setsucces(true);
+      // const token = localStorage.getItem('token');
+      // const payload = JSON.parse(atob(token.split('.')[1]));
+      // const userId = payload.id;
+      // console.log(token);
+      // console.log(token);
+      const xd = await axios.post(backendUrl, { 
+        todo, 
+        description, 
+        isDone: false, 
+        difficulty, 
+        date, 
+        time,
+      });
+      console.log(xd);
+      setSuccess(true);
       setTodo('');
       setDescription('');
+      setDifficulty(50);
+      setDate(new Date().toISOString().split('T')[0]);
+      setTime('12:00');
     } catch (err) {
-      alert("Enter the Todo and Description Both", err);
+      console.error("Error adding todo", err);
+      alert("Error adding todo");
     }
   };
 
-  const HandleDone = async (index) => {
+  const handleDone = async (index) => {
     const id = todos[index]._id;
     const isDone = !todos[index].isDone;
     try {
       await axios.patch(`${backendUrl}/${id}`, { isDone });
-      fetchTodos();
     } catch (err) {
-      alert("Error in Updating the Todo", err);
+      alert("Error updating todo",err);
     }
   };
 
-  const HandleDelete = async (index) => {
+  const handleDelete = async (index) => {
     const id = todos[index]._id;
     try {
       await axios.delete(`${backendUrl}/${id}`);
-      fetchTodos();
     } catch (err) {
-      alert("Error in Deleting the Todo", err);
+      alert("Error deleting todo",err);
     }
   };
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    // window.location.reload();
+    navigate('/signin');
+  }
+
   return (
     <div className="flex flex-col items-center bg-gray-100 min-h-screen p-6">
-      {/* <Header /> */}
       <div className="bg-white shadow-lg rounded-xl p-6 w-full max-w-md">
         
-        {/* Success/Error Messages */}
         {success !== null && (
           <div className={`p-3 text-white text-center font-semibold rounded-lg mb-4 ${success ? 'bg-green-500' : 'bg-red-500'}`}>
             {success ? "Todo Added Successfully" : "Enter the Todo and Description Both"}
           </div>
         )}
 
-        {/* Input Fields */}
         <div className="space-y-3">
           <input
             type="text"
             value={todo}
             onChange={(e) => setTodo(e.target.value)}
             placeholder="Enter your todo"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
           <input
             type="text"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             placeholder="Enter your description"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
-          {/* Difficulty Between 1 to 100 */}
+
+          <label>Difficulty: {difficulty}</label>
           <input
-            value={Difficulty}
-            onChange={(e) => setDifficulty(Number(e.target.value))}
             type="range"
             min="1"
             max="100"
-            step="1"
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2"
+            value={difficulty}
+            onChange={(e) => setDifficulty(parseInt(e.target.value, 10))}
+            className="w-full"
           />
+
+          <label>Date:</label>
           <input 
-            value = {date}
-            onChange={(e) => setdate(Number(e.target.value))}
             type="date" 
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
+
+          <label>Time:</label>
           <input 
-            type = "time"
-            value = {time}
-            min="05:00" max="23:00"
-            onChange={(e) => settime(Number(e.target.value))}
-            className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            type="time"
+            value={time}
+            onChange={(e) => setTime(e.target.value)}
+            className="w-full p-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
           />
+
           <button
-            onClick={onsubmit}
+            onClick={onSubmit}
             className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-lg font-semibold"
           >
             Add Todo
@@ -119,7 +148,6 @@ function LandingPage() {
         </div>
       </div>
 
-      {/* Todo List */}
       <div className="mt-6 w-full max-w-2xl">
         <h2 className="text-xl font-semibold text-gray-800 mb-3">Your Todos</h2>
         <table className="w-full bg-white shadow-md rounded-lg overflow-hidden">
@@ -127,36 +155,30 @@ function LandingPage() {
             <tr className="bg-gray-200 text-gray-700">
               <th className="py-2 px-4 text-left">Todo</th>
               <th className="py-2 px-4 text-left">Description</th>
+              <th className="py-2 px-4 text-left">Difficulty</th>
+              <th className="py-2 px-4 text-left">Date</th>
+              <th className="py-2 px-4 text-left">Time</th>
               <th className="py-2 px-4 text-center">Actions</th>
             </tr>
           </thead>
           <tbody>
             {todos.map((todo, index) => (
-              <tr
-                key={index}
-                className={`border-b ${todo.isDone ? 'bg-green-100' : 'bg-red-100'}`}
-              >
+              <tr key={index} className={`border-b ${todo.isDone ? 'bg-green-100' : 'bg-red-100'}`}>
                 <td className="py-2 px-4">{todo.todo}</td>
                 <td className="py-2 px-4">{todo.description}</td>
-                <td className="py-2 px-4 flex justify-center space-x-2">
-                  <button
-                    onClick={() => HandleDone(index)}
-                    className={`px-4 py-1 rounded-lg font-semibold ${todo.isDone ? 'bg-green-500 text-white' : 'bg-gray-500 text-white'}`}
-                  >
-                    {todo.isDone ? "Done" : "Not Done"}
-                  </button>
-                  <button
-                    onClick={() => HandleDelete(index)}
-                    className="px-4 py-1 bg-red-500 text-white rounded-lg font-semibold hover:bg-red-600"
-                  >
-                    Delete
-                  </button>
+                <td className="py-2 px-4">{todo.difficulty}</td>
+                <td className="py-2 px-4">{new Date(todo.date).toLocaleDateString()}</td>
+                <td className="py-2 px-4">{todo.time}</td>
+                <td className="py-2 px-4 flex space-x-2">
+                  <button onClick={() => handleDone(index)} className="bg-gray-500 text-white px-2 rounded cursor-pointer">{todo.isDone ? "Undo" : "Done"}</button>
+                  <button onClick={() => handleDelete(index)} className="bg-red-500 text-white px-2 rounded cursor-pointer">Delete</button>
                 </td>
               </tr>
             ))}
           </tbody>
         </table>
       </div>
+      <div><button onClick={handleLogout}>Logout</button></div>
     </div>
   );
 }

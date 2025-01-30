@@ -1,25 +1,30 @@
 import axios from 'axios';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Signup = () => {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
   const backendUrl = 'http://localhost:8000/user';
 
   const SignupSubmitHandler = async () => {
-    if (name === '' || email === '' || password === '') {
-      setSuccess(false);
-      return;
-    }
     try {
+      if (name === '' || email === '' || password === '') {
+        setSuccess(false);
+        return;
+      }
       await axios.post(backendUrl, { name, email, password });
       setSuccess(true);
       setName('');
       setEmail('');
       setPassword('');
-      window.location.href = "http://localhost:5173/signin";
+      setTimeout(() => {
+        navigate("/signin"); 
+    }, 1000);
+      ;
     } catch (err) {
       alert('Error in signup', err);
     }

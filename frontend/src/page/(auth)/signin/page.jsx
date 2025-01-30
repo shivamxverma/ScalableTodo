@@ -1,10 +1,12 @@
 import axios from 'axios';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Signin = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [success, setSuccess] = useState(false);
+  const navigate = useNavigate();
   const backendUrl = 'http://localhost:8000/user';
 
   const SigninSubmitHandler = async () => {
@@ -14,12 +16,17 @@ const Signin = () => {
     }
     try {
       await axios.post(backendUrl, { email, password });
+      // localStorage.setItem('token', res.data.token); 
+      // console.log(res.data.token);
       setSuccess(true);
       setEmail('');
       setPassword('');
-      window.location.href = "http://localhost:5173/";
+      setTimeout(() => {
+        navigate("/");
+      }, 1000);
     } catch (err) {
       alert('Error in signin', err);
+      
     }
   };
 
