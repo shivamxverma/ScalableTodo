@@ -1,32 +1,39 @@
 const User = require('../models/user');
 const bcrypt = require('bcrypt');
-const { v4 : uuidv4 } = require('uuid');
-const {setUser,getUser} = require('../services/auth');
+// const jwt = require('jsonwebtoken');
+// const {generateToken} = require('../services/auth');
 
-const getUserforSignin = async (req,res) => {
-  const user = req.body;
-  const {email , password}  = user;
-  const isSignup = await User.findOne({ email });
-  
-  if(!isSignup){
-    console.log('user does not exist');
-    return res.json({msg:"use is not exist signup"});
+const userLogin = async (req,res) => {
+  try{
+    const {email , password}  = req.body;
+    const user = await User.findOne({ email });
+
+    if(!user){
+      return res.status(404).json({msg:"user not found"});
+    }
+
+    const isValid = bcrypt.compareSync(password, isSignup.password);
+
+    if(!isValid){
+      return res.status(404).json({msg:"Invalid Password"});
+    } 
+    // const token = generateToken(user);
+
+    // res.cookie('token', token, {
+    //   httpOnly: true, // Prevent client-side JS access
+    //   secure: process.env.NODE_ENV === 'production', // Use HTTPS in production
+    //   sameSite: 'strict', // Protect against CSRF
+    //   path: '/', // Available site-wide
+    //   maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    // });
+
+      res.status(200).json({ msg: "User is Logged In" });
+  } catch(error){
+    res.status(500).json({msg:"Server Error"});
   }
-
-  const isValid = bcrypt.compareSync(password, isSignup.password);
-
-  if(!isValid){
-    // const token = createUserToken(user);
-    return res.status(404).json({msg:"Invalid username and Password"});
-  } 
-  const sessionId = uuidv4();
-  setUser(sessionId,user);
-  res.cookie('uid',sessionId);
-  
-  return res.status(200).json({msg:"Logged in Successfully Broh"});
 };
 
-const createUser = async (req, res) => {
+const userSignup = async (req, res) => {
   const { name, email, password } = req.body;
 
   const isSignup = await User.findOne({ email });
@@ -44,6 +51,6 @@ const createUser = async (req, res) => {
 };
 
 module.exports = {
-  getUserforSignin,
-  createUser
+  userLogin,
+  userSignup
 }
