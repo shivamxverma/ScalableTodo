@@ -1,24 +1,38 @@
 const mongoose = require('mongoose');
 
 const TodoSchema = new mongoose.Schema({
-  todo : String,
-  description : String,
-  isDone : Boolean,
-  difficulty : Number,
-  date : {
-    type : Date,
-    default : Date.now
-  },  
-  time : {
-    type : Number,
-    default : 0
+  todo: {
+    type: String,
+    required: true
   },
-  user : {
-    type : mongoose.Schema.Types.ObjectId,
-    ref : 'user'
+  description: {
+    type: String,
+    required: true
+  },
+  isDone: {
+    type: Boolean,
+    default: false
+  },
+  difficulty: {
+    type: Number,
+    required: true,
+    min: 1,
+    max: 100
+  },
+  date: {
+    type: Date,
+    required: true
+  },  
+  time: {
+    type: String, 
+    required: true
+  },
+  user: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'user',
+    required: false
   }
 });
 
-const todo = mongoose.model('todos',TodoSchema);
-
-module.exports = todo;
+const Todo = mongoose.model('Task', TodoSchema);
+module.exports = Todo;
