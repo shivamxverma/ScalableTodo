@@ -1,39 +1,34 @@
-// const jwt = require('jsonwebtoken');
-// const secret = "Shivam$123@$";
+const jwt = require('jsonwebtoken');
 
-// function setUser(user){
-//   return jwt.sign({
-//     _id: user._id,
-//     email: user.email
-//   },
-//   secret);
-// }
+const dotenv = require('dotenv');
+dotenv.config();
 
-// function getUser(token){
-//   if(!token) return null;
-//   try{
-//     return jwt.verify(token,secret);
-//   }catch(error){
-//     return null;
-//   }
-// }
+function generateToken(user){
+  const payload = {
+    _id: user._id,
+    email: user.email
+  }
 
-// module.exports = {
-//   setUser,
-//   getUser
-// }
-
-const sessionIdToUserMap = new Map();
-
-function setUser(id,user){
-  sessionIdToUserMap.set(id,user);
+  if(!process.env.JWT_SECRET){
+    throw new Error("JWT Secret is missing");
+  }
+  return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: '7D' });
 }
 
-function getUser(id){
-  sessionIdToUserMap.get(id);
+function verifyToken(token){
+  if(!token) return null;
+
+  if(!process.env.JWT_SECRET){
+    throw new Error("JWT Secret is missing");
+  }
+  try{
+    return jwt.verify(token,process.env.JWT_SECRET);
+  }catch(error){
+    return null;
+  }
 }
 
 module.exports = {
-  setUser,
-  getUser
+  generateToken,
+  verifyToken
 }
