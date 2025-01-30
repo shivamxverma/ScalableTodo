@@ -1,15 +1,20 @@
 const express = require('express');
 const app = express();
+const dotenv = require("dotenv");
+dotenv.config();
 const cookieParser = require('cookie-parser');
 const cors = require('cors');
 const { Connect } = require('./utils/db');
 const userRoute = require('./routes/user');
 const todoRoute = require('./routes/todo');
-const RestrictToLoggedinUserOnly = require('./middlewares/auth');
 const port = process.env.PORT | 8000;
-const uri = process.env.MONGODB_URI;
+const url = process.env.MONGODB_URI;
 
-Connect(uri);
+if (!url) {
+  throw new Error("Database URI is not defined. Please set DB_URI in your .env file.");
+}
+
+Connect(url);
 
 app.use(express.static('../frontend'));
 app.use(cors());
@@ -19,7 +24,7 @@ app.use(cookieParser());
 app.use(express.json());
 
 app.use('/user',userRoute);
-app.use('/todo',RestrictToLoggedinUserOnly,todoRoute);
+app.use('/todo',todoRoute);
 
 app.listen(port,()=>{
   console.log(`Server is running at ${port}`);
